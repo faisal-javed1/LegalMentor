@@ -1,0 +1,128 @@
+LegalMentor Database Structure
+1. Users Table
+Primary table for all user accounts
+
+user_id (SERIAL PRIMARY KEY)
+email (VARCHAR(255), UNIQUE, NOT NULL)
+password_hash (VARCHAR(255), NOT NULL)
+full_name (VARCHAR(255), NOT NULL)
+user_type (VARCHAR(50), NOT NULL) - Options: 'lawyer', 'individual', 'admin'
+phone_number (VARCHAR(20))
+created_at (TIMESTAMP)
+updated_at (TIMESTAMP)
+
+2. Lawyer Profiles Table
+Extended information for lawyer accounts
+
+lawyer_id (INTEGER PRIMARY KEY, REFERENCES users.user_id)
+bar_license_number (VARCHAR(50), UNIQUE, NOT NULL)
+specialization (TEXT[])
+years_of_experience (INTEGER)
+firm_name (VARCHAR(255))
+office_address (TEXT)
+
+3. Legal Cases Table
+Stores information about legal cases
+
+case_id (SERIAL PRIMARY KEY)
+case_number (VARCHAR(100), UNIQUE, NOT NULL)
+title (VARCHAR(255), NOT NULL)
+description (TEXT)
+case_type (VARCHAR(100), NOT NULL)
+status (VARCHAR(50), NOT NULL) - Options: 'active', 'closed', 'pending'
+filing_date (DATE, NOT NULL)
+closure_date (DATE)
+court_name (VARCHAR(255))
+judge_name (VARCHAR(255))
+created_at (TIMESTAMP)
+updated_at (TIMESTAMP)
+
+4. Case Citations Table
+Repository of legal citations and precedents
+
+citation_id (SERIAL PRIMARY KEY)
+citation_number (VARCHAR(100), UNIQUE, NOT NULL)
+title (TEXT, NOT NULL)
+summary (TEXT)
+decision_summary (TEXT)
+court (VARCHAR(255), NOT NULL)
+judgment_date (DATE)
+citation_text (TEXT, NOT NULL)
+keywords (TEXT[])
+created_at (TIMESTAMP)
+
+5. Documents Table
+Manages all legal documents
+
+document_id (SERIAL PRIMARY KEY)
+title (VARCHAR(255), NOT NULL)
+document_type (VARCHAR(100), NOT NULL)
+file_path (VARCHAR(512), NOT NULL)
+file_size (INTEGER, NOT NULL)
+mime_type (VARCHAR(100), NOT NULL)
+uploaded_by (INTEGER, REFERENCES users.user_id)
+case_id (INTEGER, REFERENCES legal_cases.case_id)
+upload_date (TIMESTAMP)
+last_modified (TIMESTAMP)
+
+6. Calendar Events Table
+Manages schedules and appointments
+
+event_id (SERIAL PRIMARY KEY)
+user_id (INTEGER, REFERENCES users.user_id)
+case_id (INTEGER, REFERENCES legal_cases.case_id)
+title (VARCHAR(255), NOT NULL)
+description (TEXT)
+event_type (VARCHAR(50), NOT NULL)
+start_time (TIMESTAMP, NOT NULL)
+end_time (TIMESTAMP, NOT NULL)
+location (TEXT)
+reminder_time (TIMESTAMP)
+created_at (TIMESTAMP)
+
+7. Clients Table
+Stores client information
+
+client_id (SERIAL PRIMARY KEY)
+user_id (INTEGER, REFERENCES users.user_id)
+lawyer_id (INTEGER, REFERENCES lawyer_profiles.lawyer_id)
+company_name (VARCHAR(255))
+industry (VARCHAR(100))
+address (TEXT)
+created_at (TIMESTAMP)
+updated_at (TIMESTAMP)
+
+8. Case Assignments Table
+Links lawyers to cases
+
+assignment_id (SERIAL PRIMARY KEY)
+case_id (INTEGER, REFERENCES legal_cases.case_id)
+lawyer_id (INTEGER, REFERENCES lawyer_profiles.lawyer_id)
+client_id (INTEGER, REFERENCES clients.client_id)
+role (VARCHAR(100)) - Options: 'lead', 'associate', 'consultant'
+assigned_date (TIMESTAMP)
+status (VARCHAR(50), NOT NULL) - Options: 'active', 'completed', 'transferred'
+
+9. Chat History Table
+Records AI chatbot interactions
+
+chat_id (SERIAL PRIMARY KEY)
+user_id (INTEGER, REFERENCES users.user_id)
+query_text (TEXT, NOT NULL)
+response_text (TEXT, NOT NULL)
+timestamp (TIMESTAMP)
+feedback_rating (INTEGER) - Range: 1-5
+feedback_text (TEXT)
+
+10. Legal Statutes Table
+Repository of laws and regulations
+
+statute_id (SERIAL PRIMARY KEY)
+title (VARCHAR(255), NOT NULL)
+description (TEXT, NOT NULL)
+category (VARCHAR(100), NOT NULL)
+jurisdiction (VARCHAR(100), NOT NULL)
+effective_date (DATE)
+content (TEXT, NOT NULL)
+keywords (TEXT[])
+last_updated (TIMESTAMP)
