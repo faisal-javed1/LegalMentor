@@ -5,14 +5,20 @@ import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
+interface Message {
+  text: string;
+  sender: 'user' | 'bot';
+  timestamp: Date;
+}
+
 const Chat = () => {
-  const [messages, setMessages] = useState([
+  const [messages, setMessages] = useState<Message[]>([
     { text: "Hello! How can I assist you with your legal questions today?", sender: "bot", timestamp: new Date() }
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [showActions, setShowActions] = useState(null);
-  const messagesEndRef = useRef(null);
+  const [showActions, setShowActions] = useState<number | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -22,7 +28,7 @@ const Chat = () => {
     scrollToBottom();
   }, [messages]);
 
-  const formatTime = (date) => {
+  const formatTime = (date: Date) => {
     return new Date(date).toLocaleTimeString('en-US', {
       hour: 'numeric',
       minute: '2-digit',
@@ -30,10 +36,10 @@ const Chat = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (input.trim()) {
-      const newMessage = { text: input, sender: "user", timestamp: new Date() };
+      const newMessage: Message = { text: input, sender: "user", timestamp: new Date() };
       setMessages([...messages, newMessage]);
       setInput('');
       setIsTyping(true);
@@ -49,7 +55,7 @@ const Chat = () => {
     }
   };
 
-  const copyToClipboard = (text) => {
+  const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
   };
 
@@ -88,11 +94,17 @@ const Chat = () => {
                 : 'bg-[#D3D3D3] text-black mr-12'}`}>
               <ReactMarkdown
                 components={{
-                  code({node, inline, className, children, ...props}) {
+                  code({node, inline, className, children, ...props}: {
+                    node: any;
+                    inline?: boolean;
+                    className?: string;
+                    children: React.ReactNode;
+                    [key: string]: any;
+                  }) {
                     const match = /language-(\w+)/.exec(className || '');
                     return !inline && match ? (
                       <SyntaxHighlighter
-                        style={oneDark}
+                        style={oneDark as { [key: string]: React.CSSProperties }}
                         language={match[1]}
                         PreTag="div"
                         {...props}
