@@ -31,11 +31,11 @@ const Dashboard = () => {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between">
-          <h1 className="text-3xl font-bold text-gray-800">Welcome, Jane Doe</h1>
+          <h1 className="text-3xl font-bold text-gray-800">Welcome, USER</h1>
           <p className="text-gray-500 mt-1">Tuesday, February 18, 2025</p>
         </div>
         
-        {/* Summary Cards */}
+        {/* Summary Cards */}x
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition duration-200">
             <div className="flex items-center">
