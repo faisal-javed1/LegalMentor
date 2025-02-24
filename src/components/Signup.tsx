@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { BookOpen, Scale } from 'lucide-react';
+import { BookOpen, Scale, Check, X, Eye, EyeOff } from 'lucide-react';
 
 const Signup = () => {
   const [name, setName] = useState('');
@@ -8,22 +8,99 @@ const Signup = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [passwordStrength, setPasswordStrength] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
+
+  // Previous validation functions remain the same
+  const validatePassword = (pass) => {
+    if (pass.length < 8) return 'weak';
+    
+    const hasUpperCase = /[A-Z]/.test(pass);
+    const hasLowerCase = /[a-z]/.test(pass);
+    const hasNumbers = /\d/.test(pass);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(pass);
+    
+    const strength = 
+      (hasUpperCase ? 1 : 0) +
+      (hasLowerCase ? 1 : 0) +
+      (hasNumbers ? 1 : 0) +
+      (hasSpecialChar ? 1 : 0);
+    
+    if (strength < 2) return 'weak';
+    if (strength < 4) return 'medium';
+    return 'strong';
+  };
+
+  const getPasswordStrengthColor = (strength) => {
+    switch (strength) {
+      case 'weak': return 'bg-red-500';
+      case 'medium': return 'bg-yellow-500';
+      case 'strong': return 'bg-green-500';
+      default: return 'bg-gray-200';
+    }
+  };
+
+  useEffect(() => {
+    if (password) {
+      setPasswordStrength(validatePassword(password));
+    } else {
+      setPasswordStrength('');
+    }
+  }, [password]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (password.length < 8 || password.length > 14) {
+      setError('Password must be between 8 and 14 characters');
+      return;
+    }
+    
+    if (!/[A-Z]/.test(password)) {
+      setError('Password must contain at least one uppercase letter');
+      return;
+    }
+    
+    if (!/[a-z]/.test(password)) {
+      setError('Password must contain at least one lowercase letter');
+      return;
+    }
+    
+    if (!/\d/.test(password)) {
+      setError('Password must contain at least one number');
+      return;
+    }
+    
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      setError('Password must contain at least one special character');
+      return;
+    }
+    
     if (password !== confirmPassword) {
       setError("Passwords don't match");
       return;
     }
-    // Add your signup logic here
+
     console.log('Signup successful');
     navigate('/dashboard');
   };
 
+  const PasswordRequirement = ({ met, text }) => (
+    <div className="flex items-center space-x-2 text-sm">
+      {met ? (
+        <Check className="h-4 w-4 text-green-500" />
+      ) : (
+        <X className="h-4 w-4 text-red-500" />
+      )}
+      <span className={met ? 'text-green-700' : 'text-gray-600'}>{text}</span>
+    </div>
+  );
+
   return (
     <div className="min-h-screen relative">
-      {/* Wave pattern background */}
+      {/* Previous background code remains the same */}
       <div className="absolute inset-0 z-0">
         <svg xmlns="http://www.w3.org/2000/svg" className="w-full h-full" preserveAspectRatio="xMidYMid slice" viewBox="0 0 1000 1000">
           <defs>
@@ -111,30 +188,95 @@ const Signup = () => {
                   <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="password">
                     Password
                   </label>
-                  <input
-                    id="password"
-                    type="password"
-                    placeholder="Password"
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-slate-500 transition-all"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
+                  <div className="relative">
+                    <input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Password"
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-slate-500 transition-all"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-5 w-5" />
+                      ) : (
+                        <Eye className="h-5 w-5" />
+                      )}
+                    </button>
+                  </div>
+                  
+                  {/* Password strength indicator */}
+                  {password && (
+                    <div className="mt-2">
+                      <div className="flex items-center space-x-2">
+                        <div className="flex-1 h-2 rounded-full bg-gray-200">
+                          <div 
+                            className={`h-2 rounded-full transition-all ${getPasswordStrengthColor(passwordStrength)}`}
+                            style={{ width: passwordStrength === 'weak' ? '33%' : passwordStrength === 'medium' ? '66%' : '100%' }}
+                          />
+                        </div>
+                        <span className="text-sm capitalize text-gray-600">{passwordStrength}</span>
+                      </div>
+                      
+                      {/* Password requirements */}
+                      <div className="mt-3 space-y-2">
+                        <PasswordRequirement 
+                          met={password.length >= 8 && password.length <= 14}
+                          text="8-14 characters"
+                        />
+                        <PasswordRequirement 
+                          met={/[A-Z]/.test(password)}
+                          text="One uppercase letter"
+                        />
+                        <PasswordRequirement 
+                          met={/[a-z]/.test(password)}
+                          text="One lowercase letter"
+                        />
+                        <PasswordRequirement 
+                          met={/\d/.test(password)}
+                          text="One number"
+                        />
+                        <PasswordRequirement 
+                          met={/[!@#$%^&*(),.?":{}|<>]/.test(password)}
+                          text="One special character"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div>
                   <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="confirmPassword">
                     Confirm Password
                   </label>
-                  <input
-                    id="confirmPassword"
-                    type="password"
-                    placeholder="Confirm password"
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-slate-500 transition-all"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                  />
+                  <div className="relative">
+                    <input
+                      id="confirmPassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="Confirm password"
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-slate-500 transition-all"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="h-5 w-5" />
+                      ) : (
+                        <Eye className="h-5 w-5" />
+                      )}
+                    </button>
+                  </div>
                 </div>
 
                 {error && (
